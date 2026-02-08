@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anne 💌</title>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@400;600;700&family=Indie+Flower&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --paper: #fafafa;
+            --ink: #1a1a1a;
+            --line: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Patrick Hand', cursive;
+            background: #f5f5f5;
+            color: var(--ink);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Paper texture background */
+        .paper-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, var(--line) 1px, transparent 1px),
+                linear-gradient(var(--line) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .app {
+            height: 100vh;
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--paper);
+            position: relative;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Scribble borders - hand-drawn effect */
+        @keyframes scribble {
+            0%, 100% { d: path("M 0 0 Q 2 2, 4 0 T 8 0"); }
+            50% { d: path("M 0 0 Q 2 -2, 4 0 T 8 0"); }
+        }
+
+        /* Notebook spiral holes on left */
+        .spiral-holes {
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            bottom: 40px;
+            width: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            z-index: 1;
+        }
+
+        .spiral-hole {
+            width: 10px;
+            height: 10px;
+            border: 2px solid var(--ink);
+            border-radius: 50%;
+            background: white;
+        }
+
+        /* Header - hand-drawn style */
+        .header {
+            padding: 1.5rem 3rem 1rem 3rem;
+            border-bottom: 2px solid var(--ink);
+            position: relative;
+            background: var(--paper);
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 20%;
+            right: 20%;
+            height: 2px;
+            background: var(--ink);
+            transform: rotate(-0.5deg);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        /* Scribble avatar */
+        .avatar {
+            width: 60px;
+            height: 60px;
+            position: relative;
+        }
+
+        .avatar-circle {
+            width: 100%;
+            height: 100%;
+            border: 3px solid var(--ink);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            background: white;
+            position: relative;
+            transform: rotate(-2deg);
+        }
+
+        .avatar-circle::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border: 2px solid var(--ink);
+            border-radius: 50%;
+            transform: rotate(4deg);
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .header-name {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            transform: rotate(-1deg);
+            display: inline-block;
+        }
+
+        .header-status {
+            font-size: 1rem;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--ink);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        /* Messages area - notebook paper style */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem 3rem 1rem 3rem;
+            position: relative;
+            background: 
+                repeating-linear-gradient(
+                    transparent,
+                    transparent 28px,
+                    #e8e8e8 28px,
+                    #e8e8e8 29px
+                );
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: var(--ink);
+            border-radius: 10px;
+            border: 2px solid var(--paper);
+        }
+
+        /* Date divider - handwritten */
+        .date-divider {
+            text-align: center;
+            font-family: 'Indie Flower', cursive;
+            font-size: 0.9rem;
+            color: #666;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .date-divider::before,
+        .date-divider::after {
+            content: '~';
+            margin: 0 0.5rem;
+        }
+
+        /* Message bubbles - scribble style */
+        .message {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px) rotate(1deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            position: relative;
+            background: white;
+            border: 2.5px solid var(--ink);
+            border-radius: 15px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            transform: rotate(-0.5deg);
+        }
+
+        .message.user .message-bubble {
+            transform: rotate(0.5deg);
+            background: #f9f9f9;
+        }
+
+        /* Scribble border effect */
+        .message-bubble::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 2px solid var(--ink);
+            border-radius: 15px;
+            opacity: 0.3;
+            transform: rotate(-1deg);
+        }
+
+        .message.anne .message-bubble {
+            border-bottom-left-radius: 3px;
+        }
+
+        .message.user .message-bubble {
+            border-bottom-right-radius: 3px;
+        }
+
+        /* Hand-drawn arrow pointer */
+        .message-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-right: 2.5px solid var(--ink);
+            border-bottom: 2.5px solid var(--ink);
+            transform: rotate(45deg);
+        }
+
+        .message.anne .message-bubble::after {
+            left: -8px;
+            border-left: 2.5px solid var(--ink);
+            border-right: none;
+            transform: rotate(-135deg);
+        }
+
+        .message.user .message-bubble::after {
+            right: -8px;
+            background: #f9f9f9;
+        }
+
+        .message-time {
+            font-family: 'Indie Flower', cursive;
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 0.35rem;
+            text-align: right;
+        }
+
+        /* Typing indicator - animated scribbles */
+        .typing {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            animation: slideUp 0.3s ease;
+        }
+
+        .typing-bubble {
+            background: white;
+            border: 2.5px solid var(--ink);
+            border-radius: 15px;
+            border-bottom-left-radius: 3px;
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            transform: rotate(-0.5deg);
+            position: relative;
+        }
+
+        .typing-bubble::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 2px solid var(--ink);
+            border-radius: 15px;
+            opacity: 0.3;
+            transform: rotate(-1deg);
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--ink);
+            border-radius: 50%;
+            animation: typingDot 1s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-8px);
+                opacity: 1;
+            }
+        }
+
+        /* Input area - scribble box */
+        .input-area {
+            padding: 1rem 3rem 1.5rem 3rem;
+            border-top: 2px solid var(--ink);
+            position: relative;
+            background: var(--paper);
+        }
+
+        .input-area::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 15%;
+            right: 15%;
+            height: 2px;
+            background: var(--ink);
+            transform: rotate(0.5deg);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .input-box-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .input-box {
+            width: 100%;
+            background: white;
+            border: 2.5px solid var(--ink);
+            border-radius: 20px;
+            padding: 0.75rem 1.25rem;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: var(--ink);
+            resize: none;
+            max-height: 100px;
+            overflow-y: auto;
+            transform: rotate(-0.3deg);
+        }
+
+        .input-box::placeholder {
+            color: #999;
+        }
+
+        .input-box:focus {
+            outline: none;
+            transform: rotate(0deg);
+        }
+
+        /* Scribble effect on input */
+        .input-box-container::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border: 2px solid var(--ink);
+            border-radius: 20px;
+            opacity: 0.2;
+            pointer-events: none;
+            transform: rotate(1deg);
+        }
+
+        /* Send button - hand-drawn circle */
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            background: var(--ink);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+            transform: rotate(-3deg);
+            flex-shrink: 0;
+        }
+
+        .send-btn::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border: 2.5px solid var(--ink);
+            border-radius: 50%;
+            transform: rotate(5deg);
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: rotate(3deg) scale(1.05);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Welcome screen - notebook doodle style */
+        .welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .welcome-avatar {
+            width: 120px;
+            height: 120px;
+            border: 4px solid var(--ink);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Caveat', cursive;
+            font-size: 4rem;
+            font-weight: 700;
+            background: white;
+            position: relative;
+            transform: rotate(-5deg);
+            box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-avatar::before,
+        .welcome-avatar::after {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border: 3px solid var(--ink);
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        .welcome-avatar::before {
+            transform: rotate(8deg);
+        }
+
+        .welcome-avatar::after {
+            transform: rotate(-12deg);
+        }
+
+        .welcome h2 {
+            font-family: 'Caveat', cursive;
+            font-size: 2.5rem;
+            font-weight: 700;
+            transform: rotate(-2deg);
+        }
+
+        .welcome p {
+            font-size: 1.2rem;
+            max-width: 400px;
+            line-height: 1.6;
+            color: #555;
+            position: relative;
+        }
+
+        /* Doodle underlines */
+        .welcome p::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: var(--ink);
+            transform: rotate(-1deg);
+            opacity: 0.3;
+        }
+
+        /* Starter buttons - scribble boxes */
+        .starters {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 1rem;
+        }
+
+        .starter-btn {
+            background: white;
+            border: 2.5px solid var(--ink);
+            border-radius: 12px;
+            padding: 1rem;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.05rem;
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            position: relative;
+            transform: rotate(-1deg);
+        }
+
+        .starter-btn:nth-child(2n) {
+            transform: rotate(1deg);
+        }
+
+        .starter-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 2px solid var(--ink);
+            border-radius: 12px;
+            opacity: 0.2;
+            transform: rotate(2deg);
+        }
+
+        .starter-btn:hover {
+            transform: rotate(0deg) translateY(-4px);
+            box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        /* Hand-drawn doodles decoration */
+        .doodle {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .doodle-1 { top: 15%; left: 10%; animation-delay: 0s; }
+        .doodle-2 { top: 25%; right: 8%; animation-delay: 0.5s; }
+        .doodle-3 { bottom: 20%; left: 12%; animation-delay: 1s; }
+        .doodle-4 { bottom: 30%; right: 10%; animation-delay: 1.5s; }
+
+        /* Scribble icons */
+        .icon {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 600px) {
+            .app {
+                max-width: 100%;
+            }
+
+            .header,
+            .messages,
+            .input-area {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .spiral-holes {
+                display: none;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+                font-size: 1rem;
+            }
+
+            .welcome h2 {
+                font-size: 2rem;
+            }
+
+            .starters {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Paper texture overlay */
+        .paper-texture {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Cpath d='M0 0h1v1H0V0zm2 2h1v1H2V2z' fill='%23000' fill-opacity='0.02'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="paper-bg"></div>
+    <div class="paper-texture"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const API_URL = 'https://anne-io.onrender.com/chat';
+
+        function App() {
+            const [messages, setMessages] = useState([]);
+            const [input, setInput] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const messagesEndRef = useRef(null);
+
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages, isTyping]);
+
+            const formatTime = () => {
+                const now = new Date();
+                return now.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+            };
+
+            const getHistory = () => {
+                return messages.slice(-10).map(msg => ({
+                    role: msg.sender === 'user' ? 'user' : 'assistant',
+                    content: msg.text
+                }));
+            };
+
+            const sendMessage = async (text) => {
+                if (!text.trim()) return;
+
+                const userMsg = {
+                    id: Date.now(),
+                    sender: 'user',
+                    text: text,
+                    time: formatTime()
+                };
+
+                setMessages(prev => [...prev, userMsg]);
+                setInput('');
+                setIsTyping(true);
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: text,
+                            history: getHistory()
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+                    
+                    setTimeout(() => {
+                        setIsTyping(false);
+                        const anneMsg = {
+                            id: Date.now() + 1,
+                            sender: 'anne',
+                            text: data.reply || "my brain is lagging.. try again?",
+                            time: formatTime()
+                        };
+                        setMessages(prev => [...prev, anneMsg]);
+                    }, 600);
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    setTimeout(() => {
+                        setIsTyping(false);
+                        const errorMsg = {
+                            id: Date.now() + 1,
+                            sender: 'anne',
+                            text: "my brain is lagging.. try again?",
+                            time: formatTime()
+                        };
+                        setMessages(prev => [...prev, errorMsg]);
+                    }, 600);
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                sendMessage(input);
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                }
+            };
+
+            return (
+                <div className="app">
+                    {/* Spiral holes */}
+                    <div className="spiral-holes">
+                        {[...Array(12)].map((_, i) => (
+                            <div key={i} className="spiral-hole"></div>
+                        ))}
+                    </div>
+
+                    {/* Header */}
+                    <div className="header">
+                        <div className="header-content">
+                            <div className="avatar">
+                                <div className="avatar-circle">A</div>
+                            </div>
+                            <div className="header-text">
+                                <div className="header-name">Anne</div>
+                                <div className="header-status">
+                                    <div className="status-dot"></div>
+                                    online
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Messages or Welcome */}
+                    {messages.length === 0 ? (
+                        <div className="welcome">
+                            <div className="doodle doodle-1">✿</div>
+                            <div className="doodle doodle-2">✦</div>
+                            <div className="doodle doodle-3">♡</div>
+                            <div className="doodle doodle-4">✧</div>
+
+                            <div className="welcome-avatar">A</div>
+                            <h2>hey, i'm anne ♡</h2>
+                            <p>just a chill girl from delhi.. we're friends now so no weird stuff lol</p>
+                            
+                            <div className="starters">
+                                <button className="starter-btn" onClick={() => sendMessage("hey what's up")}>
+                                    hey what's up
+                                </button>
+                                <button className="starter-btn" onClick={() => sendMessage("how you been?")}>
+                                    how you been?
+                                </button>
+                                <button className="starter-btn" onClick={() => sendMessage("what you doing rn")}>
+                                    what you doing rn
+                                </button>
+                                <button className="starter-btn" onClick={() => sendMessage("tell me something")}>
+                                    tell me something
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="messages">
+                            {messages.length > 0 && (
+                                <div className="date-divider">
+                                    {new Date().toLocaleDateString('en-US', { 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    })}
+                                </div>
+                            )}
+                            
+                            {messages.map(msg => (
+                                <div key={msg.id} className={`message ${msg.sender}`}>
+                                    <div className="message-bubble">
+                                        {msg.text}
+                                        <div className="message-time">{msg.time}</div>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {isTyping && (
+                                <div className="typing">
+                                    <div className="typing-bubble">
+                                        <div className="typing-dot"></div>
+                                        <div className="typing-dot"></div>
+                                        <div className="typing-dot"></div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <div ref={messagesEndRef} />
+                        </div>
+                    )}
+
+                    {/* Input */}
+                    <div className="input-area">
+                        <form onSubmit={handleSubmit} className="input-wrapper">
+                            <div className="input-box-container">
+                                <textarea
+                                    className="input-box"
+                                    placeholder="type a message.."
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                    rows="1"
+                                    onInput={(e) => {
+                                        e.target.style.height = 'auto';
+                                        e.target.style.height = Math.min(e.target.scrollHeight, 100) + 'px';
+                                    }}
+                                />
+                            </div>
+                            <button 
+                                type="submit" 
+                                className="send-btn"
+                                disabled={!input.trim()}
+                            >
+                                <svg className="icon" viewBox="0 0 24 24">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
