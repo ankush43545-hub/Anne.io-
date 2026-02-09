@@ -3,385 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anne ✒️</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Gochi+Hand&display=swap" rel="stylesheet">
-    
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <style>
-        :root {
-            --ink: #000000;
-            --paper: #ffffff;
-            --border-width: 2.5px;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            font-family: 'Patrick Hand', cursive;
-            background-color: #fafafa;
-            /* Dot grid pattern */
-            background-image: radial-gradient(#d0d0d0 1.5px, transparent 1.5px);
-            background-size: 24px 24px;
-            margin: 0;
-            height: 100vh;
-            /* Fix for mobile address bars */
-            height: 100dvh; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--ink);
-            overflow: hidden;
-        }
-
-        /* --- THE CARD --- */
-        .chat-card {
-            width: 100%;
-            max-width: 500px;
-            height: 100%;
-            max-height: 92vh;
-            background: var(--paper);
-            border: var(--border-width) solid var(--ink);
-            border-radius: 4px;
-            box-shadow: 10px 10px 0px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Mobile adjustment: Full screen on phones */
-        @media (max-width: 600px) {
-            .chat-card { 
-                max-height: 100dvh; 
-                border: none; 
-                box-shadow: none; 
-            }
-        }
-
-        /* --- HEADER --- */
-        .header {
-            padding: 15px 20px;
-            border-bottom: var(--border-width) solid var(--ink);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,0.98);
-            z-index: 10;
-        }
-
-        .profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border: var(--border-width) solid var(--ink);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            background: white;
-        }
-
-        .info h1 {
-            font-family: 'Gochi Hand', cursive;
-            font-size: 1.6rem;
-            margin: 0;
-            line-height: 1;
-        }
-
-        .status {
-            font-size: 0.9rem;
-            opacity: 0.6;
-        }
-
-        /* --- MESSAGES AREA --- */
-        #messages-area {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            background-image: linear-gradient(#e5e5e5 1px, transparent 1px);
-            background-size: 100% 32px;
-            background-attachment: local;
-            position: relative;
-        }
-
-        /* Empty State */
-        #empty-state {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            opacity: 0.4;
-            width: 100%;
-            transition: opacity 0.3s;
-        }
-        
-        #empty-state.hidden { opacity: 0; pointer-events: none; }
-
-        .empty-icon { display: block; margin: 0 auto 10px; }
-        .empty-text { font-family: 'Gochi Hand', cursive; font-size: 1.4rem; }
-
-        /* Message Bubbles */
-        .message-row {
-            display: flex;
-            width: 100%;
-            animation: popIn 0.3s ease-out;
-            position: relative;
-        }
-        
-        @keyframes popIn {
-            0% { transform: translateY(10px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
-        .message-row.anne { justify-content: flex-start; }
-        .message-row.user { justify-content: flex-end; }
-
-        .bubble {
-            max-width: 80%;
-            padding: 12px 18px;
-            font-size: 1.1rem;
-            line-height: 1.4;
-            position: relative;
-            border: var(--border-width) solid var(--ink);
-            box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
-        }
-
-        /* Styles */
-        .anne .bubble {
-            background: white;
-            color: var(--ink);
-            border-radius: 20px 20px 20px 4px;
-            transform: rotate(-1deg);
-        }
-
-        .user .bubble {
-            background: var(--ink);
-            color: white;
-            border-radius: 20px 20px 4px 20px;
-            transform: rotate(1deg);
-        }
-
-        /* Copy Icon */
-        .copy-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            opacity: 0;
-            cursor: pointer;
-            padding: 5px;
-            transition: opacity 0.2s;
-        }
-        
-        .message-row:hover .copy-btn { opacity: 0.6; }
-        .anne .copy-btn { left: calc(100% + 5px); }
-        .user .copy-btn { right: calc(100% + 5px); }
-
-        /* --- INPUT AREA --- */
-        .input-area {
-            padding: 15px;
-            border-top: var(--border-width) solid var(--ink);
-            background: white;
-            display: flex;
-            align-items: flex-end;
-            gap: 10px;
-        }
-
-        #input-field {
-            flex: 1;
-            border: var(--border-width) solid var(--ink);
-            border-radius: 8px 12px 10px 6px; 
-            padding: 12px;
-            font-family: 'Patrick Hand', cursive;
-            font-size: 1.1rem;
-            outline: none;
-            resize: none;
-            height: 50px;
-            max-height: 120px;
-        }
-
-        #send-btn {
-            width: 50px;
-            height: 50px;
-            background: var(--ink);
-            color: white;
-            border: none;
-            border-radius: 40% 60% 50% 50% / 50% 50% 60% 40%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        #send-btn:active { transform: scale(0.95); }
-        #send-btn:disabled { opacity: 0.5; }
-
-        /* Loading */
-        .typing { display: none; padding: 10px 20px; font-size: 0.9rem; opacity: 0.7; }
-        .typing.visible { display: block; }
-        .dot { animation: bounce 1.4s infinite; display: inline-block; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
-
-    </style>
+    <title>Chat with Anne</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </head>
 <body>
 
-<div class="chat-card">
-    <div class="header">
-        <div class="profile">
-            <div class="avatar">A</div>
-            <div class="info">
-                <h1>Anne</h1>
-                <div class="status">● Online</div>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="chat-container">
+        
+        <header class="chat-header">
+            <div class="header-info">
+                <div class="avatar">
+                    <span>A</span>
+                </div>
+                <div class="name-block">
+                    <h1>Anne</h1>
+                    <span class="status">Always here for you</span>
+                </div>
+            </div>
+            <button id="refresh-btn" class="icon-btn" aria-label="Restart Chat">
+                <ion-icon name="refresh-outline"></ion-icon>
+            </button>
+        </header>
+
+        <div id="chat-feed" class="chat-feed">
+            <div class="message bot intro">
+                <div class="bubble">
+                    Hello! I'm Anne. I'm listening... what's on your mind?
+                </div>
+                <div class="msg-meta">
+                    <span class="copy-btn">Copy</span>
+                </div>
             </div>
         </div>
-        <i data-lucide="more-vertical" style="opacity: 0.5;"></i>
-    </div>
 
-    <div id="messages-area">
-        <div id="empty-state">
-            <i data-lucide="pen-tool" class="empty-icon" size="32"></i>
-            <span class="empty-text">Type something to start...</span>
+        <div class="input-area">
+            <div class="glass-input-wrapper">
+                <input type="text" id="user-input" placeholder="Type a message..." autocomplete="off">
+                <button id="send-btn">
+                    <ion-icon name="arrow-up-circle"></ion-icon>
+                </button>
+            </div>
         </div>
-        
-        </div>
-    
-    <div class="typing" id="typing-indicator">
-        Anne is writing <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+
     </div>
 
-    <div class="input-area">
-        <textarea id="input-field" placeholder="Write something..."></textarea>
-        <button id="send-btn">
-            <i data-lucide="send" size="20"></i>
-        </button>
-    </div>
-</div>
-
-<script>
-    // Initialize Icons
-    lucide.createIcons();
-
-    const API_URL = "https://anne-io.onrender.com/chat";
-    const messagesArea = document.getElementById('messages-area');
-    const inputField = document.getElementById('input-field');
-    const sendBtn = document.getElementById('send-btn');
-    const emptyState = document.getElementById('empty-state');
-    const typingIndicator = document.getElementById('typing-indicator');
-
-    // Store history
-    let chatHistory = [];
-
-    // Helper: Create Message Element
-    function addMessage(text, sender) {
-        // Hide empty state on first message
-        emptyState.classList.add('hidden');
-
-        const row = document.createElement('div');
-        row.className = `message-row ${sender}`;
-        
-        // Copy Button logic
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'copy-btn';
-        copyBtn.innerHTML = '<i data-lucide="copy" size="14"></i>';
-        copyBtn.onclick = () => {
-            navigator.clipboard.writeText(text);
-            copyBtn.innerHTML = '<i data-lucide="check" size="14"></i>';
-            lucide.createIcons();
-            setTimeout(() => {
-                copyBtn.innerHTML = '<i data-lucide="copy" size="14"></i>';
-                lucide.createIcons();
-            }, 2000);
-        };
-
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        bubble.textContent = text;
-
-        row.appendChild(copyBtn);
-        row.appendChild(bubble);
-        messagesArea.appendChild(row);
-
-        // Re-render icons for new elements
-        lucide.createIcons();
-        
-        // Scroll to bottom
-        messagesArea.scrollTop = messagesArea.scrollHeight;
-
-        // Save to history
-        chatHistory.push({
-            role: sender === 'user' ? 'user' : 'assistant',
-            content: text
-        });
-    }
-
-    async function handleSend() {
-        const text = inputField.value.trim();
-        if (!text) return;
-
-        // 1. User Message
-        addMessage(text, 'user');
-        inputField.value = "";
-        
-        // 2. Loading State
-        typingIndicator.classList.add('visible');
-        sendBtn.disabled = true;
-        messagesArea.scrollTop = messagesArea.scrollHeight; // Keep scrolling
-
-        try {
-            // 3. API Call
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    message: text,
-                    history: chatHistory 
-                })
-            });
-
-            if (!response.ok) throw new Error("Server error");
-            const data = await response.json();
-
-            // 4. Bot Response
-            const botReply = data.reply || data.message || data.response || "I couldn't read that (API Error)";
-            addMessage(botReply, 'anne');
-
-        } catch (error) {
-            console.error(error);
-            addMessage("⚠️ Error: Couldn't reach Anne.", 'anne');
-        } finally {
-            typingIndicator.classList.remove('visible');
-            sendBtn.disabled = false;
-        }
-    }
-
-    // Event Listeners
-    sendBtn.addEventListener('click', handleSend);
-    
-    inputField.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-        }
-    });
-
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
