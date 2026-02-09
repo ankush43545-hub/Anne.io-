@@ -2,14 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anne ✒️</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Gochi+Hand&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
     
     <script src="https://unpkg.com/lucide@latest"></script>
     
@@ -20,6 +16,8 @@
             --border-width: 2.5px;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
             font-family: 'Patrick Hand', cursive;
             background-color: #fafafa;
@@ -28,6 +26,8 @@
             background-size: 24px 24px;
             margin: 0;
             height: 100vh;
+            /* Fix for mobile address bars */
+            height: 100dvh; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -39,19 +39,30 @@
         .chat-card {
             width: 100%;
             max-width: 500px;
-            height: 92vh;
+            height: 100%;
+            max-height: 92vh;
             background: var(--paper);
             border: var(--border-width) solid var(--ink);
-            border-radius: 2px; 
-            box-shadow: 12px 12px 0px rgba(0,0,0,0.15);
+            border-radius: 4px;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
             position: relative;
+            overflow: hidden;
+        }
+
+        /* Mobile adjustment: Full screen on phones */
+        @media (max-width: 600px) {
+            .chat-card { 
+                max-height: 100dvh; 
+                border: none; 
+                box-shadow: none; 
+            }
         }
 
         /* --- HEADER --- */
         .header {
-            padding: 20px 25px;
+            padding: 15px 20px;
             border-bottom: var(--border-width) solid var(--ink);
             display: flex;
             align-items: center;
@@ -63,79 +74,75 @@
         .profile {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .avatar {
-            width: 50px;
-            height: 50px;
+            width: 42px;
+            height: 42px;
             border: var(--border-width) solid var(--ink);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             background: white;
-            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
         }
 
         .info h1 {
             font-family: 'Gochi Hand', cursive;
-            font-size: 2rem;
+            font-size: 1.6rem;
             margin: 0;
-            line-height: 0.9;
+            line-height: 1;
         }
 
         .status {
-            font-size: 1rem;
+            font-size: 0.9rem;
             opacity: 0.6;
-            margin-top: 4px;
         }
 
         /* --- MESSAGES AREA --- */
-        .messages-area {
+        #messages-area {
             flex: 1;
-            padding: 25px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            /* Lined paper background */
+            gap: 20px;
             background-image: linear-gradient(#e5e5e5 1px, transparent 1px);
             background-size: 100% 32px;
             background-attachment: local;
             position: relative;
         }
 
-        /* Empty State (Centered Placeholder) */
-        .empty-state {
+        /* Empty State */
+        #empty-state {
             position: absolute;
-            top: 50%;
+            top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
             opacity: 0.4;
-            width: 80%;
-            pointer-events: none; /* Allows clicking through if needed */
+            width: 100%;
+            transition: opacity 0.3s;
         }
+        
+        #empty-state.hidden { opacity: 0; pointer-events: none; }
 
-        .empty-text {
-            font-size: 1.5rem;
-            font-family: 'Gochi Hand', cursive;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .empty-icon {
-            display: inline-block;
-            transform: rotate(-10deg);
-        }
+        .empty-icon { display: block; margin: 0 auto 10px; }
+        .empty-text { font-family: 'Gochi Hand', cursive; font-size: 1.4rem; }
 
         /* Message Bubbles */
         .message-row {
             display: flex;
             width: 100%;
+            animation: popIn 0.3s ease-out;
             position: relative;
+        }
+        
+        @keyframes popIn {
+            0% { transform: translateY(10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
 
         .message-row.anne { justify-content: flex-start; }
@@ -143,24 +150,22 @@
 
         .bubble {
             max-width: 80%;
-            padding: 15px 20px;
-            font-size: 1.25rem;
+            padding: 12px 18px;
+            font-size: 1.1rem;
             line-height: 1.4;
             position: relative;
             border: var(--border-width) solid var(--ink);
             box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
         }
 
-        /* Anne (White) */
+        /* Styles */
         .anne .bubble {
             background: white;
             color: var(--ink);
-            border-radius: 20px 20px 20px 4px; 
+            border-radius: 20px 20px 20px 4px;
             transform: rotate(-1deg);
         }
 
-        /* User (Black) */
         .user .bubble {
             background: var(--ink);
             color: white;
@@ -168,60 +173,53 @@
             transform: rotate(1deg);
         }
 
-        /* Copy Button */
+        /* Copy Icon */
         .copy-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
+            background: none;
             border: none;
-            background: transparent;
-            cursor: pointer;
             opacity: 0;
+            cursor: pointer;
+            padding: 5px;
             transition: opacity 0.2s;
-            padding: 8px;
-            color: var(--ink);
         }
         
-        .message-row:hover .copy-btn { opacity: 0.5; }
-        .copy-btn:hover { opacity: 1 !important; transform: scale(1.1); }
+        .message-row:hover .copy-btn { opacity: 0.6; }
         .anne .copy-btn { left: calc(100% + 5px); }
         .user .copy-btn { right: calc(100% + 5px); }
 
         /* --- INPUT AREA --- */
         .input-area {
-            padding: 20px;
+            padding: 15px;
             border-top: var(--border-width) solid var(--ink);
             background: white;
             display: flex;
             align-items: flex-end;
-            gap: 12px;
+            gap: 10px;
         }
 
-        .input-field {
+        #input-field {
             flex: 1;
             border: var(--border-width) solid var(--ink);
             border-radius: 8px 12px 10px 6px; 
-            padding: 15px;
+            padding: 12px;
             font-family: 'Patrick Hand', cursive;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             outline: none;
             resize: none;
-            min-height: 55px;
-            max-height: 150px;
-            transition: box-shadow 0.2s;
+            height: 50px;
+            max-height: 120px;
         }
 
-        .input-field:focus {
-            box-shadow: 3px 3px 0px rgba(0,0,0,0.15);
-        }
-
-        .send-btn {
-            width: 55px;
-            height: 55px;
+        #send-btn {
+            width: 50px;
+            height: 50px;
             background: var(--ink);
             color: white;
             border: none;
-            border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%;
+            border-radius: 40% 60% 50% 50% / 50% 50% 60% 40%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -229,189 +227,160 @@
             transition: transform 0.1s;
         }
 
-        .send-btn:hover { transform: scale(1.05) rotate(5deg); }
-        .send-btn:active { transform: scale(0.95); }
-        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #send-btn:active { transform: scale(0.95); }
+        #send-btn:disabled { opacity: 0.5; }
 
-        /* Loading Dots */
-        .typing-indicator {
-            padding: 10px 20px;
-            opacity: 0.7;
-            font-size: 0.9rem;
-            display: flex;
-            gap: 4px;
-        }
-        .dot { animation: bounce 1.4s infinite ease-in-out both; }
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        /* Loading */
+        .typing { display: none; padding: 10px 20px; font-size: 0.9rem; opacity: 0.7; }
+        .typing.visible { display: block; }
+        .dot { animation: bounce 1.4s infinite; display: inline-block; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
 
-        @media (max-width: 600px) {
-            .chat-card { height: 100vh; border: none; border-radius: 0; box-shadow: none; }
-        }
     </style>
 </head>
 <body>
 
-<div id="root"></div>
+<div class="chat-card">
+    <div class="header">
+        <div class="profile">
+            <div class="avatar">A</div>
+            <div class="info">
+                <h1>Anne</h1>
+                <div class="status">● Online</div>
+            </div>
+        </div>
+        <i data-lucide="more-vertical" style="opacity: 0.5;"></i>
+    </div>
 
-<script type="text/babel">
-    const { useState, useRef, useEffect } = React;
-    const { Send, Copy, Check, MoreVertical, PenTool } = lucide;
+    <div id="messages-area">
+        <div id="empty-state">
+            <i data-lucide="pen-tool" class="empty-icon" size="32"></i>
+            <span class="empty-text">Type something to start...</span>
+        </div>
+        
+        </div>
+    
+    <div class="typing" id="typing-indicator">
+        Anne is writing <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+    </div>
+
+    <div class="input-area">
+        <textarea id="input-field" placeholder="Write something..."></textarea>
+        <button id="send-btn">
+            <i data-lucide="send" size="20"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    // Initialize Icons
+    lucide.createIcons();
 
     const API_URL = "https://anne-io.onrender.com/chat";
+    const messagesArea = document.getElementById('messages-area');
+    const inputField = document.getElementById('input-field');
+    const sendBtn = document.getElementById('send-btn');
+    const emptyState = document.getElementById('empty-state');
+    const typingIndicator = document.getElementById('typing-indicator');
 
-    function App() {
-        // Start with EMPTY array - no welcome message
-        const [messages, setMessages] = useState([]);
-        const [input, setInput] = useState("");
-        const [isLoading, setIsLoading] = useState(false);
-        const [copiedId, setCopiedId] = useState(null);
-        const bottomRef = useRef(null);
+    // Store history
+    let chatHistory = [];
 
-        // Auto-scroll
-        useEffect(() => {
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, [messages, isLoading]);
+    // Helper: Create Message Element
+    function addMessage(text, sender) {
+        // Hide empty state on first message
+        emptyState.classList.add('hidden');
 
-        // Helper: Format history
-        const getHistory = () => {
-            return messages.map(msg => ({
-                role: msg.sender === 'user' ? 'user' : 'assistant',
-                content: msg.text
-            }));
-        };
-
-        const handleSend = async () => {
-            if (!input.trim() || isLoading) return;
-
-            const userText = input;
-            setInput(""); 
-            
-            // 1. Add User Message
-            const userMsg = { id: Date.now(), text: userText, sender: 'user' };
-            setMessages(prev => [...prev, userMsg]);
-            setIsLoading(true);
-
-            try {
-                // 2. Call Backend
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: userText, 
-                        history: getHistory() 
-                    })
-                });
-
-                if (!response.ok) throw new Error("Server error");
-                const data = await response.json();
-                
-                // 3. Handle Response
-                const botText = data.reply || data.message || data.response || "I scribbled something, but I can't read it... (API Error)";
-                const botMsg = { id: Date.now() + 1, text: botText, sender: 'anne' };
-                setMessages(prev => [...prev, botMsg]);
-
-            } catch (error) {
-                console.error("Connection Error:", error);
-                setMessages(prev => [...prev, { 
-                    id: Date.now(), 
-                    text: "⚠️ Server Error. Is the link correct?", 
-                    sender: 'error' 
-                }]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        const copyText = (text, id) => {
+        const row = document.createElement('div');
+        row.className = `message-row ${sender}`;
+        
+        // Copy Button logic
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.innerHTML = '<i data-lucide="copy" size="14"></i>';
+        copyBtn.onclick = () => {
             navigator.clipboard.writeText(text);
-            setCopiedId(id);
-            setTimeout(() => setCopiedId(null), 2000);
+            copyBtn.innerHTML = '<i data-lucide="check" size="14"></i>';
+            lucide.createIcons();
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i data-lucide="copy" size="14"></i>';
+                lucide.createIcons();
+            }, 2000);
         };
 
-        return (
-            <div className="chat-card">
-                {/* HEADER */}
-                <div className="header">
-                    <div className="profile">
-                        <div className="avatar">A</div>
-                        <div className="info">
-                            <h1>Anne</h1>
-                            <div className="status">● Online</div>
-                        </div>
-                    </div>
-                    <MoreVertical size={24} style={{opacity: 0.5, cursor: 'pointer'}} />
-                </div>
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = text;
 
-                {/* MESSAGES AREA */}
-                <div className="messages-area">
-                    
-                    {/* Placeholder: Only shows when messages array is empty */}
-                    {messages.length === 0 && !isLoading && (
-                        <div className="empty-state">
-                            <span className="empty-icon"><PenTool size={32} /></span>
-                            <span className="empty-text">Type something to start...</span>
-                        </div>
-                    )}
+        row.appendChild(copyBtn);
+        row.appendChild(bubble);
+        messagesArea.appendChild(row);
 
-                    {messages.map((msg) => (
-                        <div key={msg.id} className={`message-row ${msg.sender}`}>
-                            
-                            <button 
-                                className="copy-btn" 
-                                onClick={() => copyText(msg.text, msg.id)}
-                                title="Copy"
-                            >
-                                {copiedId === msg.id ? <Check size={16} /> : <Copy size={16} />}
-                            </button>
+        // Re-render icons for new elements
+        lucide.createIcons();
+        
+        // Scroll to bottom
+        messagesArea.scrollTop = messagesArea.scrollHeight;
 
-                            <div className="bubble">
-                                {msg.text}
-                            </div>
-                        </div>
-                    ))}
-                    
-                    {isLoading && (
-                        <div className="message-row anne">
-                            <div className="typing-indicator">
-                                Anne is writing <span className="dot">.</span><span className="dot">.</span><span className="dot">.</span>
-                            </div>
-                        </div>
-                    )}
-                    
-                    <div ref={bottomRef} />
-                </div>
-
-                {/* INPUT */}
-                <div className="input-area">
-                    <textarea 
-                        className="input-field"
-                        placeholder="Write something..."
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSend();
-                            }
-                        }}
-                        disabled={isLoading}
-                    />
-                    <button 
-                        className="send-btn" 
-                        onClick={handleSend}
-                        disabled={isLoading || !input.trim()}
-                    >
-                        <Send size={22} strokeWidth={2.5} />
-                    </button>
-                </div>
-            </div>
-        );
+        // Save to history
+        chatHistory.push({
+            role: sender === 'user' ? 'user' : 'assistant',
+            content: text
+        });
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    async function handleSend() {
+        const text = inputField.value.trim();
+        if (!text) return;
+
+        // 1. User Message
+        addMessage(text, 'user');
+        inputField.value = "";
+        
+        // 2. Loading State
+        typingIndicator.classList.add('visible');
+        sendBtn.disabled = true;
+        messagesArea.scrollTop = messagesArea.scrollHeight; // Keep scrolling
+
+        try {
+            // 3. API Call
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    message: text,
+                    history: chatHistory 
+                })
+            });
+
+            if (!response.ok) throw new Error("Server error");
+            const data = await response.json();
+
+            // 4. Bot Response
+            const botReply = data.reply || data.message || data.response || "I couldn't read that (API Error)";
+            addMessage(botReply, 'anne');
+
+        } catch (error) {
+            console.error(error);
+            addMessage("⚠️ Error: Couldn't reach Anne.", 'anne');
+        } finally {
+            typingIndicator.classList.remove('visible');
+            sendBtn.disabled = false;
+        }
+    }
+
+    // Event Listeners
+    sendBtn.addEventListener('click', handleSend);
+    
+    inputField.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    });
+
 </script>
 
 </body>
